@@ -1,10 +1,4 @@
-/**
- * VM Example class - Resourec usage
- *
- * @author Karim Djemame
- * @version 1.0 [2018-02-16]
- *
- */
+
 
 import java.io.*;
 
@@ -85,8 +79,7 @@ public int minHostID2 =0;
 				//diskUsage = (Double.parseDouble(host.xpath("/HOST/HOST_SHARE/getNumVM"))/Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MAX_DISK")))*100;
 
 
-//System.out.println("..........." + memUsage + "xffdgdfgdf" + cpuUsage );
-		//		calVMStatus = memUsage + cpuUsage;
+/
 
 				estPower = cpuUsage;
 
@@ -121,15 +114,14 @@ public int minHostID2 =0;
 
 				int numVM = Integer.parseInt(host.xpath("/HOST/HOST_SHARE/RUNNING_VMS"));
 
-			// minMemUsage = calVMStatus/(double)numVM;
-
+			
 				arrHost.add(new HOSTPERF(Integer.parseInt(host.xpath("/HOST/ID")), (host.xpath("/HOST/NAME")).toString(), cpuUsage, memUsage, diskUsage, numVM));
 
 			}
 
 System.out.println("Minimun CPU  usage:...." + minCPUUsage);
 System.out.println("Best host ID:...." + minHostID);
-//System.out.println("Average:...." + Double.toString(minMemUsage ));
+
 
 
 			System.out.println("Physical Hosts with resource usage:....");

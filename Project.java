@@ -104,20 +104,6 @@ else
 
 
 
-            //create the VMSample object to complete the program
-
-      //    VMResource= new ResourceUsage();
-      //    VMResource.retrieveInformation( oneClient);
-          ///////Host id Returned by our algorithm (Minimum CPU utilization), where the Vm will be deployed or migrated
-        //  besthost=VMResource.getHost();
-
-      /*  MinCPUHost=VMResource.getMinCPUHost();
-        MaxCPUHost=VMResource.getMaxCPUHost();
-        System.out.println( "The HOST ID WITH CPU Utilization < 15% : " + MinCPUHost);
-        System.out.println( "The HOST ID WITH CPU Utilization > 50 % : " + MaxCPUHost);*/
-
-//besthost=12;
-
 
 
         }
@@ -332,23 +318,12 @@ try {
                     System.out.println();
                 //    System.out.println(
 
-                  //          "This is the information OpenNebula stores for the new VM:");
-                  //  System.out.println(rc.getMessage() + "\n");
-
-                    // This VirtualMachine object has some helpers, so we can access its
-                    // attributes easily (remember to load the data first using the info
-                    // method).
                     System.out.println("The new VM " + vm.getName() + " has status: " + vm.status() + " VM ID: " + vm.getId() );
 
                     long endTime = System.currentTimeMillis();
                     long elapsed = endTime - startTime;
                     System.out.println("Time Elapsed to deploy... " +  elapsed);
 
-                    // System.out.println("%d%n",elapsed);
-                    // And we can also use xpath expressions
-                    //System.out.println("VM information :" + vm.info());
-//                    System.out.println("The path of the disk is");
-                  // System.out.println( "\t" + vm.xpath("template/disk/source") );
 
 
                     System.out.println( "\t" + " VM DEPLOYED HAS CPU USAGE : "   + vm.xpath("/VM/TEMPLATE/CPU") );
@@ -780,7 +755,7 @@ rc = vmPool.info();
                         else
                         {
 
-            //////////////////give the delay of 30Secs between each shutdown
+            ///////////give the delay of 30Secs between each shutdown
                       SECONDS.sleep(30);
                       long startTimeshut = System.currentTimeMillis();
 

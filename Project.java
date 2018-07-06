@@ -169,17 +169,6 @@ else
 
 }
 
-/*  ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
-public static void run(){
-ses.scheduleAtFixedRate(new Runnable() {
-    @Override
-
-    public void run() {
-        CheckCPUThreshold();
-    }
-}, 0, 1, TimeUnit.HOURS);
-
-}*/
 
 
 public static void VM1(int RequestCPU)
@@ -569,7 +558,7 @@ catch (Exception e) {
 
                                 MinCPUHost=VMResource.getMinCPUHost();
                                 MaxCPUHost=VMResource.getMaxCPUHost();
-                                System.out.println( "The HOST ID WITH CPU Utilization < 15 % : " + MinCPUHost);
+                                System.out.println( "The HOST ID WITH CPU Utilization < 10 % : " + MinCPUHost);
                                 System.out.println( "The HOST ID WITH CPU Utilization > 50 % : " + MaxCPUHost);
 
                                 if (MinCPUHost != 0)
@@ -818,49 +807,6 @@ rc = vmPool.info();
           }
       }
 
-      /////////////////////////////migrate the VM ///////////////////////////
-
-      public static void migrate()
-      {
-        try{
-        long startTimeMigrate = System.currentTimeMillis();
-      //  System.out.println(" Start Migrate Status." + vm.status() );
-      /// System.out.println(rc.getMessage() + "\n");
-
-        rc = vm.liveMigrate(besthost);
-
-      ////we need to poweroff the machine for cold migation
-      //  rc=vm.poweroff();
-      //rc=vm.info();
-      //System.out.println("status1: " + vm.status());
-
-      ////we will migrate to the best host according to our algo
-
-      //rc = vm.migrate(besthost);
-
-      rc=vm.info();
-
-      ///Checking the status of the VM untill it running
-      while (vm.status() != "runn")
-      {
-      rc=vm.info();
-      }
-
-       System.out.println(" End migrate Status. " + vm.status() );
-
-        long endTimeMigrate = System.currentTimeMillis();
-        long Migrate = endTimeMigrate - startTimeMigrate;
-        System.out.println("Time Elapsed to Migrate... " +  Migrate);
-
-      }
-              catch (Exception e) {
-
-                System.out.println(e.getMessage());
-              }
-
-
-      }
-
-
+      
 
 }

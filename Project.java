@@ -87,9 +87,9 @@ else
               switch (Integer.parseInt(RequestCPU)) {
                 //task one
                 //case 1: taskOne(vmTemplate, client, 0); break;
-                case 1: VM1(1); break;
-                case 2: VM1(2); break;
-                case 3: VM1(3); break;
+                case 1: CreateVM(1); break;
+                case 2: CreateVM(2); break;
+                case 3: CreateVM(3); break;
                 case 4: CheckCPUThreshold();break;
                 case 5: break loop;
                 //handle wrong number being entered
@@ -134,7 +134,7 @@ else
 
 
         //SECONDS.sleep(30);
-        VM1();
+        CreateVM();
 
     }*/
 
@@ -147,7 +147,7 @@ else
 
 /////////////////////CODE TO MIGRATE////////////////////////////////
 //migrate();
-//MigrationPolicy();
+//MigrateVM();
 //////////////////////////////////////////////////////////////////////
 
 /////////////////////CODE TO Check Threshold////////////////////////////////
@@ -169,9 +169,20 @@ else
 
 }
 
+/*  ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+public static void run(){
+ses.scheduleAtFixedRate(new Runnable() {
+    @Override
+
+    public void run() {
+        CheckCPUThreshold();
+    }
+}, 0, 1, TimeUnit.HOURS);
+
+}*/
 
 
-public static void VM1(int RequestCPU)
+public static void CreateVM(int RequestCPU)
       {
 try {
         // We will try to create a new virtual machine. The first thing we
@@ -380,7 +391,7 @@ catch (Exception e) {
 				rc = host.info();
 				  //System.out.println(rc.getMessage() + "\n");
           hostid=Integer.parseInt(host.xpath("/HOST/ID"));
-//System.out.println("HOST ID :" +hostid);
+System.out.println("HOST ID~~~~ :" +hostid);
            if (hostid == MaxCPUHost )
            {
 
@@ -420,7 +431,10 @@ catch (Exception e) {
                                       {
                                         minCPU = estCPU;
                                         SelectedVMForMigration=Integer.parseInt(vm.getId());
-
+					//VMCurrentHost= (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
+         VMCurrentHost=hostid;
+          System.out.println("Test CUrrent Host:" + hostid);
+					//System.out.println("Test Max VM HOST:" + VMCurrentHost);
                                       }
 
                                   }
@@ -436,7 +450,7 @@ catch (Exception e) {
             VMResource.retrieveInformation( oneClient);
             /////Host id Returned by our algorithm, where the VM will be migrated
             besthost=VMResource.getHost();
-            MigrationPolicy();
+            MigrateVM();
 
         }
         else {
@@ -474,7 +488,7 @@ catch (Exception e) {
         rc = host.info();
           //System.out.println(rc.getMessage() + "\n");
           hostid=Integer.parseInt(host.xpath("/HOST/ID"));
-  //System.out.println("HOST ID :" +hostid);
+      //    System.out.println("HOST ID~~~ :" + hostid);
            if (hostid == MinCPUHost )
            {
 
@@ -503,9 +517,9 @@ catch (Exception e) {
                                     //  rc = vmPool.info();
                                    if (vm != null)
                                    {
-                                        System.out.println("~~~~~~~~~~" + vm.getId()  + "~~~~" + vmid);
+                                       // System.out.println("~~~~~~~~~~" + vm.getId()  + "~~~~" + vmid);
                                         vmCPU = (Double.parseDouble(vm.xpath("/VM_POOL/VM/TEMPLATE/CPU")));
-                                    //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
+                                     // VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
 
                                     //  vmCPUusage = (Double.parseDouble(vm.xpath("/VM/TEMPLATE/CPU") ));
                                     //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM/HISTORY_RECORDS/HISTORY/HID") ));
@@ -517,7 +531,10 @@ catch (Exception e) {
                                       {
                                         minCPU = estCPU;
                                         SelectedVMForMigration=Integer.parseInt(vm.getId());
-
+					//VMCurrentHost=(Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
+          VMCurrentHost=hostid;
+           System.out.println("Test CUrrent Host:" + hostid);
+				//	System.out.println("Test CUrrent Host:" + VMCurrentHost);
                                       }
 
                                   }
@@ -531,7 +548,7 @@ catch (Exception e) {
           VMResource.retrieveInformation( oneClient);
           /////Host id Returned by our algorithm, where the VM will be migrated
           besthost=VMResource.getHost2();
-          MigrationPolicy();
+          MigrateVM();
 
       }
       else{
@@ -564,12 +581,13 @@ catch (Exception e) {
                                 if (MinCPUHost != 0)
                                 {
                                   //  flag=true;
-                                    //MigrationPolicy();
+                                    //MigrateVM();
                                     System.out.println( "Checking VM List for Min Migration.........." );
+                                  //    ManageJob();
                                     GetMinHostDetails();
                                 }
                                 else {
-                                  ///////////set the flag to flase to stop migrationpolicy
+                                  ///////////set the flag to flase to stop MigrateVM
                                   //flag=false;
                                 }
 
@@ -579,11 +597,11 @@ catch (Exception e) {
                                   System.out.println( "Checking VM List for MAX Migration.........." );
                                   //  flag=true;
                                   //flag=false;
-                                    //  MigrationPolicy();
+                                    //  MigrateVM();
                                     GetMaxHostDetails();
                                 }
                                 else {
-                                  ///////////set the flag to flase to stop migrationpolicy
+                                  ///////////set the flag to flase to stop MigrateVM
                             //    flag=false;
                               }
 
@@ -609,7 +627,7 @@ catch (Exception e) {
     /////////////////////////////NEW VM MIGRATION POLICY///////////////////////////
 
 
-          public static void MigrationPolicy(  )
+          public static void MigrateVM(  )
 
           {
 
@@ -622,23 +640,28 @@ catch (Exception e) {
 rc = vmPool.info();
            String id = vm.getId();
            String name = vm.getName();
+
            String enab = vm.xpath("enabled");
            System.out.println("ID : NAME : " + id+"\t\t"+name+"\t\t"+enab);
 
 //VMResource.retrieveInformation( oneClient);
                                   /////Host id Returned by our algorithm, where the VM will be migrated
-  //                                besthost=VMResource.getHost();
+  //                         ////19072018      // besthost=VMResource.getHost();
                                 //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID") ));
                                   VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
-                                  System.out.println ("HHOOOOOOOSST" + VMCurrentHost );
-                                  System.out.println ("HHOOOOOOOSST22222" + VMResource.getHost2() );
+                                 // System.out.println ("Current VM HOST " + VMCurrentHost );
+                                  System.out.println ("Best Host > 10% " + VMResource.getHost2() );
+
+                                    //   // GLOBAL TIME for the VM
+                                  //  System.out.println (" VM start Time was : " + vm.xpath("/VM_POOL/VM/STIME" ));
 
                                   // check the existing host of the VM . if it is same as the suggested for migrattion then migration will not be done
 
                                 if (VMCurrentHost != besthost)
                                 {
                                 System.out.println("The VM ID : " + SelectedVMForMigration + " , Deployed on Host ID : " + VMCurrentHost + " Will be Migrated to Host ID : " + besthost );
-                                     rc = vm.liveMigrate(besthost);
+                                //  System.out.println(" The VM ID : " + SelectedVMForMigration + " , will be migrated to Host : " + besthost );
+					                             rc = vm.liveMigrate(besthost);
 
                                      rc=vm.info();
                                      ///Checking the status of the VM untill it running
@@ -659,6 +682,7 @@ rc = vmPool.info();
                               //No need to migrate to same host
                                   }
 
+ System.out.println(rc.getMessage() + "\n");
 
       }
 
@@ -670,6 +694,28 @@ rc = vmPool.info();
 }
 
 //////////////////////END NEW VM MIGRATION POLICY/////////////////////////
+
+
+
+/////////////////////////////Manage JOBs///////////////////////////
+
+    public static void ManageJob(  )
+
+    {
+
+
+  try{
+      /////////// if VM remaining time is greater than the calcutated time then we will do the migration else dont i.e   (Roffset > Toff ) .
+      }
+
+
+
+        catch (Exception e) {
+
+        System.out.println(e.getMessage());
+        }
+    }
+
 
 
 
@@ -807,6 +853,6 @@ rc = vmPool.info();
           }
       }
 
-      
+
 
 }

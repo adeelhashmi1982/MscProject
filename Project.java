@@ -41,6 +41,11 @@ public class Project{
   public static boolean flag = true;
   public static int SelectedVMForMigration=0;
   public static int VMCurrentHost=0;
+    public static int AA=100;
+  public static int PsourceId=1000;
+  public static int PtargetId=2000;
+
+  public static boolean GoodMigrate = true;
 
     public static void main(String[] args)
     {
@@ -185,6 +190,8 @@ ses.scheduleAtFixedRate(new Runnable() {
 public static void CreateVM(int RequestCPU)
       {
 try {
+
+  long VMstartTime = System.currentTimeMillis();
         // We will try to create a new virtual machine. The first thing we
         // need is an OpenNebula virtual machine template.
 
@@ -193,6 +200,8 @@ try {
         // exist.
 
         ///////////////////////////////////////////////////////////////////
+
+
         String vmTemplate ="";
 
         if (RequestCPU==1)
@@ -285,6 +294,11 @@ try {
 
 
                     long startTime = System.currentTimeMillis();
+
+                    vmTemplate = vmTemplate + "START=" + VMstartTime;
+
+                      System.out.println(vmTemplate);
+
                      rc = VirtualMachine.allocate(oneClient, vmTemplate);
 
                     if( rc.isError() )
@@ -637,7 +651,7 @@ System.out.println("HOST ID~~~~ :" +hostid);
           VirtualMachinePool vmPool = new VirtualMachinePool(oneClient);
            rc = vmPool.info();
            VirtualMachine vm = vmPool.getById(SelectedVMForMigration);
-rc = vmPool.info();
+           rc = vmPool.info();
            String id = vm.getId();
            String name = vm.getName();
 
@@ -648,7 +662,7 @@ rc = vmPool.info();
                                   /////Host id Returned by our algorithm, where the VM will be migrated
   //                         ////19072018      // besthost=VMResource.getHost();
                                 //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID") ));
-                                  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
+                                  //VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
                                  // System.out.println ("Current VM HOST " + VMCurrentHost );
                                   System.out.println ("Best Host > 10% " + VMResource.getHost2() );
 
@@ -656,6 +670,10 @@ rc = vmPool.info();
                                   //  System.out.println (" VM start Time was : " + vm.xpath("/VM_POOL/VM/STIME" ));
 
                                   // check the existing host of the VM . if it is same as the suggested for migrattion then migration will not be done
+ManageJob();
+if (GoodMigrate== true){
+
+
 
                                 if (VMCurrentHost != besthost)
                                 {
@@ -681,8 +699,9 @@ rc = vmPool.info();
                                   {
                               //No need to migrate to same host
                                   }
-
- System.out.println(rc.getMessage() + "\n");
+GoodMigrate=false;
+}
+ //System.out.println(rc.getMessage() + "\n");
 
       }
 
@@ -699,13 +718,84 @@ rc = vmPool.info();
 
 /////////////////////////////Manage JOBs///////////////////////////
 
+
+public static double getPsourceA() {
+//	System.out.println("svmid:." + svmid );
+  //Psourceid=svmid;
+    PsourceId=VMCurrentHost;
+  return PsourceId;
+}
+
+public static double getPtargetA() {
+  //System.out.println("svmid:." + tvmid );
+  //Ptargetid=tvmid;
+    PtargetId=besthost;
+  return PtargetId;
+}
+
     public static void ManageJob(  )
 
     {
 
 
   try{
+
       /////////// if VM remaining time is greater than the calcutated time then we will do the migration else dont i.e   (Roffset > Toff ) .
+      VirtualMachinePool vmPool = new VirtualMachinePool(oneClient);
+       rc = vmPool.info();
+       VirtualMachine vm = vmPool.getById(SelectedVMForMigration);
+       rc = vmPool.info();
+       String id = vm.getId();
+       String name = vm.getName();
+
+       String enab = vm.xpath("enabled");
+      // System.out.println("ID : NAME : " + id+"\t\t"+name+"\t\t"+enab);
+
+
+      //long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+      //long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+                          PsourceId=VMCurrentHost;
+                          PtargetId=besthost;
+
+
+                          double Psource  =VMResource.getPsource();
+                              System.out.println(" Psource ..... " + PsourceId + "...."+ Psource);
+
+                        double Ptarget=VMResource.getPtarget();
+                              System.out.println(" Ptarget ..... " + PtargetId  +"...."+ Ptarget);
+
+
+                            long Rtotal=20 * 60000;  //total running time of 20 mins in milisecs
+                            long Start= (Long.parseLong(vm.xpath("/VM_POOL/VM/USER_TEMPLATE/START")));
+                            System.out.println(" CURRENT  VM TIME ..... " + vm.xpath("/VM_POOL/VM/USER_TEMPLATE/START"));
+                            long currenttime = System.currentTimeMillis();
+                            long Rpast= currenttime - Start;
+
+                            double Dx=Psource - Ptarget;
+                            double Costmig= 6 * Psource; // Migtime * Psource
+                            double Toff= Costmig/Dx;
+
+                            //Roffset=Rpast+tmig+toff
+                           double Roffset= Rpast + 60000 + Toff;
+                            System.out.println ("Rpast time ........." + Rpast);
+                              System.out.println ("Roffset time ........." + Roffset);
+                                System.out.println ("Toff time ........." + Toff);
+
+if (Roffset >= Toff)
+{
+  //good to migrate
+  GoodMigrate=true;
+
+}
+else
+{
+  //Not good to migrate
+    GoodMigrate=false;
+}
+                            // System.out.println ("VM INFO........." + rc.getMessage());
+                            //  System.out.println ("Best Host > 10% " + VMResource.getHost2() );
+
       }
 
 

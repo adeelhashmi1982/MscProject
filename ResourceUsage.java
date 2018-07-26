@@ -39,6 +39,12 @@ public int maxHostID=0;
 public int MinCPUHostID=0;
 public int MaxCPUHostID=0;
 public int minHostID2 =0;
+public double Psource =0.0;
+public double Ptarget =0.0;
+//public int Psourceid=0;
+//public int Ptargetid=0;
+
+
 
 	private OneResponse rc;
 	private static DecimalFormat df2 = new DecimalFormat(".##");
@@ -54,6 +60,7 @@ public int minHostID2 =0;
 
 		try
 		{
+			//System.out.println("AA:" +   Project.AA);
 			HostPool pool = new HostPool( oneClient );
 			pool.info();
 
@@ -81,6 +88,19 @@ public int minHostID2 =0;
 
 //System.out.println("..........." + memUsage + "xffdgdfgdf" + cpuUsage );
 		//		calVMStatus = memUsage + cpuUsage;
+System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
+		if (Project.getPsourceA() == Integer.parseInt(host.xpath("/HOST/ID")))
+		{
+			System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
+			Psource=cpuUsage;
+		}
+
+		if (Project.getPtargetA() == Integer.parseInt(host.xpath("/HOST/ID")))
+		{
+			System.out.println(".....TARGET ID......" + Project.getPtargetA()  );
+			Ptarget=cpuUsage;
+		}
+
 
 				estPower = cpuUsage;
 
@@ -107,6 +127,7 @@ public int minHostID2 =0;
 						{
 							MaxCPUHostID=maxHostID;
 
+
 						}
 
 				}
@@ -123,6 +144,9 @@ public int minHostID2 =0;
 
 System.out.println("Minimun CPU  usage:...." + minCPUUsage);
 System.out.println("Best host ID:...." + minHostID);
+
+
+
 //System.out.println("Average:...." + Double.toString(minMemUsage ));
 
 
@@ -255,5 +279,15 @@ double MinCPU2 = 0.0;
 	}
 	public int getMinCPUHost() {
 		return MinCPUHostID;
+	}
+	public double getPsource() {
+	//	System.out.println("svmid:." + svmid );
+		//Psourceid=svmid;
+		return Psource;
+	}
+	public double getPtarget() {
+		//System.out.println("svmid:." + tvmid );
+		//Ptargetid=tvmid;
+		return Ptarget;
 	}
 }

@@ -60,7 +60,7 @@ public double Ptarget =0.0;
 
 		try
 		{
-			//System.out.println("AA:" +   Project.AA);
+
 			HostPool pool = new HostPool( oneClient );
 			pool.info();
 
@@ -76,38 +76,37 @@ public double Ptarget =0.0;
 			for( Host host: pool)
 			{
 				rc = host.info();
-				//  System.out.println(rc.getMessage() + "\n");
-
-
 
 				cpuUsage = (Double.parseDouble(host.xpath("/HOST/HOST_SHARE/CPU_USAGE"))/Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MAX_CPU")))*100;
 				memUsage = (Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MEM_USAGE"))/Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MAX_MEM")))*100;
 				diskUsage = (Double.parseDouble(host.xpath("/HOST/HOST_SHARE/DISK_USAGE"))/Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MAX_DISK")))*100;
 				//diskUsage = (Double.parseDouble(host.xpath("/HOST/HOST_SHARE/getNumVM"))/Double.parseDouble(host.xpath("/HOST/HOST_SHARE/MAX_DISK")))*100;
 
+			 	// get and check the current Host ID of the VM
+				System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
+				if (Project.getPsourceA() == Integer.parseInt(host.xpath("/HOST/ID")))
+				{
+					System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
+					//Get the CPU usage of the source host
+					Psource=cpuUsage;
+				}
 
-//System.out.println("..........." + memUsage + "xffdgdfgdf" + cpuUsage );
-		//		calVMStatus = memUsage + cpuUsage;
-System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
-		if (Project.getPsourceA() == Integer.parseInt(host.xpath("/HOST/ID")))
-		{
-			System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
-			Psource=cpuUsage;
-		}
-
-		if (Project.getPtargetA() == Integer.parseInt(host.xpath("/HOST/ID")))
-		{
-			System.out.println(".....TARGET ID......" + Project.getPtargetA()  );
-			Ptarget=cpuUsage;
-		}
-
+				// get and check the Target Host ID of the VM
+				if (Project.getPtargetA() == Integer.parseInt(host.xpath("/HOST/ID")))
+				{
+					System.out.println(".....TARGET ID......" + Project.getPtargetA()  );
+					//Get the CPU usage of the Target host
+					Ptarget=cpuUsage;
+				}
 
 				estPower = cpuUsage;
 
-			if (estPower <= minCPUUsage) {
+				// Chekcing the Hots with minimum CPU utilization
+				if (estPower <= minCPUUsage) {
 				minCPUUsage = estPower;
 				minHostID= Integer.parseInt(host.xpath("/HOST/ID"));
-				//System.out.println("Host:...." + Double.toString(minHostID ) + "...." + cpuUsage);
+
+				// Chekcing the Hots with  CPU utilization less than or equal to 10% i.e our lower bound
 						if (minCPUUsage <= 10.00)
 						{
 							MinCPUHostID=minHostID;
@@ -117,67 +116,52 @@ System.out.println(".....SOURCE ID......" + Project.getPsourceA() );
 
 
 				estMaxPower = cpuUsage;
-
+				// Chekcing the Hots with maximum CPU utilization
 				if (estMaxPower > maxCPUUsage) {
 				maxCPUUsage = estMaxPower;
 				maxHostID= Integer.parseInt(host.xpath("/HOST/ID"));
 
-				//System.out.println("Host:...." + Double.toString(minHostID ) + "...." + cpuUsage);
-						if (maxCPUUsage > 50.00)
+				// Chekcing the Hots with  CPU utilization greater than 70 % i.e our upper bound
+						if (maxCPUUsage > 70.00)
 						{
 							MaxCPUHostID=maxHostID;
-
-
 						}
-
 				}
 
-
-
+				// Number of VMs running on the Host
 				int numVM = Integer.parseInt(host.xpath("/HOST/HOST_SHARE/RUNNING_VMS"));
 
-			// minMemUsage = calVMStatus/(double)numVM;
-
 				arrHost.add(new HOSTPERF(Integer.parseInt(host.xpath("/HOST/ID")), (host.xpath("/HOST/NAME")).toString(), cpuUsage, memUsage, diskUsage, numVM));
-
 			}
 
-System.out.println("Minimun CPU  usage:...." + minCPUUsage);
-System.out.println("Best host ID:...." + minHostID);
-
-
-
-//System.out.println("Average:...." + Double.toString(minMemUsage ));
-
+			System.out.println("Minimun CPU  usage:...." + minCPUUsage);
+			System.out.println("Best host ID:...." + minHostID);
 
 			System.out.println("Physical Hosts with resource usage:....");
 			System.out.println("HOSTID\tCPU Usage\tMem Usage\tDisk Usage\tVMs");
-arrHost.sort(Comparator.comparingDouble(HOSTPERF::getCpuUsage));
 
-boolean flag = true;
-double MinCPU2 = 0.0;
-	for(HOSTPERF h: arrHost)
-			{
-				if (h.HostCpuUsage >= 10.00 && flag == true)
-				{
-					MinCPU2=h.HostCpuUsage;
-					minHostID2=h.HOSTID ;
-					flag=false;
+			arrHost.sort(Comparator.comparingDouble(HOSTPERF::getCpuUsage));
+
+			boolean flag = true;
+			double MinCPU2 = 0.0;
+				for(HOSTPERF h: arrHost)
+						{
+							if (h.HostCpuUsage >= 10.00 && flag == true)
+							{
+								MinCPU2=h.HostCpuUsage;
+								minHostID2=h.HOSTID ;
+								flag=false;
+							}
+
+							System.out.println(h.HOSTID + "\t" + df2.format(h.HostCpuUsage) +"\t\t" + df2.format(h.HostMemUsage) + "\t\t" + h.HostDiskUsage + "\t\t" + h.NumVM);
+
+						}
+								System.out.println();
+
+				}catch(Exception e){
+					System.out.println("Error viewing all of the Host info");
+					e.printStackTrace();
 				}
-
-				System.out.println(h.HOSTID + "\t" + df2.format(h.HostCpuUsage) +"\t\t" + df2.format(h.HostMemUsage) + "\t\t" + h.HostDiskUsage + "\t\t" + h.NumVM);
-
-			}
- //System.out.println("dsdsfsdfsd" + myvmcpu);
-
-			System.out.println();
-
-			// vmAllocation(oneClient, arrHostHigh, arrHostMed, arrHostLow);
-			// arrHost.sort(Comparator.comparingDouble(HOSTPERF::getCpuUsage));
-		}catch(Exception e){
-			System.out.println("Error viewing all of the Host info");
-			e.printStackTrace();
-		}
 	}
 
 
@@ -267,27 +251,23 @@ double MinCPU2 = 0.0;
 	}
 
 	public int getHost() {
-		return minHostID;
+		return minHostID; // returns hostid wilth minimium CPU utilization
 	}
 
 	public int getHost2() {
-		return minHostID2;
+		return minHostID2; // reutns the first hostid that is not violating the minimium threshold / lower bound
 	}
 
 	public int getMaxCPUHost() {
-		return MaxCPUHostID;
+		return MaxCPUHostID; // returns hostid wilth maximum CPU utilization
 	}
 	public int getMinCPUHost() {
-		return MinCPUHostID;
+		return MinCPUHostID; // returns CPU utilization of Host
 	}
 	public double getPsource() {
-	//	System.out.println("svmid:." + svmid );
-		//Psourceid=svmid;
-		return Psource;
+			return Psource; // returns CPU utilization of Source Host
 	}
 	public double getPtarget() {
-		//System.out.println("svmid:." + tvmid );
-		//Ptargetid=tvmid;
-		return Ptarget;
+				return Ptarget; // returns CPU utilization of Target Host
 	}
 }

@@ -50,25 +50,23 @@ public class Project{
     public static void main(String[] args)
     {
 
-      // Let's try some of the OpenNebula Cloud API functionality for VMs.
-
         String passwd;
         String RequestCPU;
         String username = System.getProperty("user.name");
         passwd = new String(System.console().readPassword("[%s]", "Password:"));
 
         // First of all, a Client object has to be created.
-        // Here the client will try to connect to OpenNebula using the default
+        // The client will try to connect to OpenNebula using the following configurtaion
 
         try
         {
         		oneClient = new Client(username + ":" + passwd, "https://csgate1.leeds.ac.uk:2633/RPC2");
 RequestCPU="";
 
-////////////////////  to run every five minutes crontab  command : * /5 * * * * Path of the file/Project.java (with arugement)  .... get the path using pwd
+//////////////////// To run every five minutes we will use crontab  command : * /5 * * * * Path of the file/Project.java (with arugement)
+// if the project is run with an additional argument : java Project 1     This will be used with the Daemon that will run every 5 mins other wise menu will be listed
 if (args.length != 0) {
-    //System.out.println("run program with: java myVirtualMachineClass i, where i is 1,2,4,5 or 6 depending on which task you want to run");
-    //return;
+// Get the latest state of CPU utilization
     CheckCPUThreshold();
 }
 else
@@ -83,15 +81,10 @@ else
             System.out.println("4:  optimize");
             System.out.println("5:  Exit");
 
-            //System.out.println("5: Enter 5 to continue for more VMs");
-            //RequestCPU = new String(System.console().readLine("[%s]", "Enter : "));
-            //System.out.println("4: Enter 4 for Exit & optimize");
-            RequestCPU= new String(System.console().readLine("[%s]", "Select 1,2,3,5:"));
+            RequestCPU= new String(System.console().readLine("[%s]", "Select 1,2,3,4,5:"));
 
               //RequestCPU=Integer.parseInt(RequestCPU);
               switch (Integer.parseInt(RequestCPU)) {
-                //task one
-                //case 1: taskOne(vmTemplate, client, 0); break;
                 case 1: CreateVM(1); break;
                 case 2: CreateVM(2); break;
                 case 3: CreateVM(3); break;
@@ -102,91 +95,22 @@ else
 
               }
                 //RequestCPU= new String(System.console().readLine("[%s]", "Select Template Image [1,2,3]"));
-
             }
 
 }
 
-
-
-            //create the VMSample object to complete the program
-
-      //    VMResource= new ResourceUsage();
-      //    VMResource.retrieveInformation( oneClient);
-          ///////Host id Returned by our algorithm (Minimum CPU utilization), where the Vm will be deployed or migrated
-        //  besthost=VMResource.getHost();
-
-      /*  MinCPUHost=VMResource.getMinCPUHost();
-        MaxCPUHost=VMResource.getMaxCPUHost();
-        System.out.println( "The HOST ID WITH CPU Utilization < 15% : " + MinCPUHost);
-        System.out.println( "The HOST ID WITH CPU Utilization > 50 % : " + MaxCPUHost);*/
-
-//besthost=12;
-
-
-
         }
-
             catch (Exception e)
             {
                 System.out.println(e.getMessage());
             }
 
-
-//run();
-////Creating 8 VirtualMachine each after 30 SECONDS
- /*for (int i=0; i < 1; i++) {
-
-
-        //SECONDS.sleep(30);
-        CreateVM();
-
-    }*/
-
-
 //To check the latest status of host after placement and migration
 //VMResource.retrieveInformation( oneClient);
 
-// comment or uncomment from the options below to achieve the desired output
-
-
-/////////////////////CODE TO MIGRATE////////////////////////////////
-//migrate();
-//MigrateVM();
-//////////////////////////////////////////////////////////////////////
-
-/////////////////////CODE TO Check Threshold////////////////////////////////
-//if (flag=true)
-//{
-  // CheckCPUThreshold();
-//}
-//////////////////////////////////////////////////////////////////////
-//  GetHostDetails();
-
-/////////////////////CODE TO Delete////////////////////////////////
-//cancelandfinalize();
-//////////////////////////////////////////////////////////////////////
-
-
-
-// cancelandfinalize();
-//shutdown();
-
 }
 
-/*  ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
-public static void run(){
-ses.scheduleAtFixedRate(new Runnable() {
-    @Override
-
-    public void run() {
-        CheckCPUThreshold();
-    }
-}, 0, 1, TimeUnit.HOURS);
-
-}*/
-
-
+// This function is used for the creation of VM using three different Templates.The choice of the template will be entered by user
 public static void CreateVM(int RequestCPU)
       {
 try {
@@ -195,11 +119,8 @@ try {
         // We will try to create a new virtual machine. The first thing we
         // need is an OpenNebula virtual machine template.
 
-        // This VM template is a valid one, but it will probably fail to run
-        // if we try to deploy it; the path for the image is unlikely to
-        // exist.
 
-        ///////////////////////////////////////////////////////////////////
+        /////////////////////////////Three VM Templates Ubuntu, Docker and Hadoop//////////////////////////////////////
 
 
         String vmTemplate ="";
@@ -274,24 +195,19 @@ try {
         + "\tTYPE=\"VNC\" ]\n";
 
       }
-
-
-
-
-        //  + "CONTEXT=[\n"
+      //  + "CONTEXT=[\n"
       //  + "\t START_SCRIPT=\"apt-get update && apt-get install stress && stress --cpu 1 --io 4 --vm 2 --vm-bytes 128M &\"] \n";
 
-                  // System.out.println("Virtual Machine Template:\n" + vmTemplate);
+                  //To check the latest status of hosts
 
                   VMResource= new ResourceUsage();
                   VMResource.retrieveInformation( oneClient);
-                  ///////Host id Returned by our algorithm (Minimum CPU utilization), where the Vm will be deployed or migrated
-                  besthost=VMResource.getHost();
 
+                  ///////besthost is the host id returned by our algorithm (Minimum CPU utilization), where the Vm will be deployed or migrated
+                  besthost=VMResource.getHost();
 
                     System.out.println();
                     System.out.print("Trying to allocate the virtual machine... ");
-
 
                     long startTime = System.currentTimeMillis();
 
@@ -309,20 +225,13 @@ try {
 
                     // The response message is the new VM's ID
                     int newVMID = Integer.parseInt(rc.getMessage());
-                    System.out.println("ok, ID " + newVMID + ".");
+                    System.out.println(" New VM ID " + newVMID + ".");
 
                     // We can create a representation for the new VM, using the returned
                     // VM-ID
                     vm = new VirtualMachine(newVMID, oneClient);
 
-                    // Let's hold the VM, so the scheduler won't try to deploy it
-                  ///  System.out.print("Trying to hold the new VM... ");
-                  ///  rc = vm.hold();
-
-
-
-                  //Deploy VM on Physical host i.e here host id 11 has been defined
-
+                  //Deploy VM on Physical host i.e here host id is the most cost effective host returned by our algorithm
                     rc = vm.deploy(besthost);
 
                     if(rc.isError())
@@ -333,23 +242,18 @@ try {
                     else
                         System.out.println("ok.");
 
-                        ///Checking the status CPUof the VM untill it running
+                        ///Checking the status of the VM untill it running
                         while (vm.status() != "runn"){
                         rc=vm.info();
-
                         }
-
-                    // And now we can request its information.
-                  /// rc = vm.info();
 
                     if(rc.isError())
                         throw new Exception( rc.getErrorMessage() );
 
                     System.out.println();
-                //    System.out.println(
-
-                  //          "This is the information OpenNebula stores for the new VM:");
-                  //  System.out.println(rc.getMessage() + "\n");
+                    //  System.out.println(
+                    //  "This is the information OpenNebula stores for the new VM:");
+                    //  System.out.println(rc.getMessage() + "\n");
 
                     // This VirtualMachine object has some helpers, so we can access its
                     // attributes easily (remember to load the data first using the info
@@ -358,14 +262,13 @@ try {
 
                     long endTime = System.currentTimeMillis();
                     long elapsed = endTime - startTime;
-                    System.out.println("Time Elapsed to deploy... " +  elapsed);
+                    System.out.println("Time Elapsed to deploy the VM : " +  elapsed);
 
                     // System.out.println("%d%n",elapsed);
                     // And we can also use xpath expressions
                     //System.out.println("VM information :" + vm.info());
-//                    System.out.println("The path of the disk is");
-                  // System.out.println( "\t" + vm.xpath("template/disk/source") );
-
+                    //System.out.println("The path of the disk is");
+                    // System.out.println( "\t" + vm.xpath("template/disk/source") );
 
                     System.out.println( "\t" + " VM DEPLOYED HAS CPU USAGE : "   + vm.xpath("/VM/TEMPLATE/CPU") );
                     //System.out.println( "\t" + vm.xpath("/VM/UNAME") );
@@ -380,7 +283,7 @@ catch (Exception e) {
 
 
 
-
+/// This function will list down the details of VM hosted on the host that is violating the upper bound.
     public static void GetMaxHostDetails(  )
 
     {
@@ -397,7 +300,6 @@ catch (Exception e) {
         double minCPU=.1;
         String vmOwner="";
 
-
       HostPool pool = new HostPool( oneClient );
       pool.info();
       for( Host host: pool)
@@ -405,12 +307,11 @@ catch (Exception e) {
 				rc = host.info();
 				  //System.out.println(rc.getMessage() + "\n");
           hostid=Integer.parseInt(host.xpath("/HOST/ID"));
-System.out.println("HOST ID~~~~ :" +hostid);
+          //System.out.println("HOST ID~~~~ :" +hostid);
            if (hostid == MaxCPUHost )
            {
-
-                //  System.out.println("sadsadasdasd" + Integer.parseInt(host.xpath("/HOST/VMS/ID")));
-               ///////////////////
+                //Checking the list of VMs placed on the Current Host
+               //List down the VM Ids on this spesfic hostid
                    String xml = rc.getMessage();
                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                    DocumentBuilder builder = factory.newDocumentBuilder();
@@ -419,36 +320,30 @@ System.out.println("HOST ID~~~~ :" +hostid);
                    XPath xpath = xPathfactory.newXPath();
                    NodeList list = (NodeList) xpath.evaluate("/HOST/VMS/ID", doc, XPathConstants.NODESET);
 
+                   //get the VM Id of each VM on that host
                    for (int i = 0; i < list.getLength(); ++i) {
                        Node node = list.item(i);
-                       //Node node = list3.item(i);
-                                //   System.out.println(node.getFirstChild().getNodeValue());
+
                                    vmid=Integer.parseInt(node.getFirstChild().getNodeValue());
-
                                    System.out.println("My VM ID .........." + vmid);
-
-
-                                     VirtualMachinePool vmPool = new VirtualMachinePool(oneClient);
-                                      rc = vmPool.info();
+                                   VirtualMachinePool vmPool = new VirtualMachinePool(oneClient);
+                                  rc = vmPool.info();
 
                                    VirtualMachine vm = vmPool.getById(vmid);
                                    if (vm != null)
                                    {
                                       //  System.out.println("~~~~~~~~~~" + vm.getId());
                                     vmCPU = (Double.parseDouble(vm.xpath("/VM_POOL/VM/TEMPLATE/CPU")));
-                                  //  vmOwner= vm.xpath("/VM_POOL/VM/UNAME");
-                                    //VMCurrentHost = (Integer.parseInt(vm.xpath("/VM/HISTORY_RECORDS/HISTORY/HID") ));
+                                    estCPU= vmCPU;
 
-                                        estCPU= vmCPU;
-                                        ///////VM id Returned having maximum CPU utilization, This VM will be moigrated to new host
+                                      //VM id Returned having maximum CPU utilization, This VM will be migrated to new host
                                       if (estCPU >= minCPU)
                                       {
                                         minCPU = estCPU;
                                         SelectedVMForMigration=Integer.parseInt(vm.getId());
-					//VMCurrentHost= (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
-         VMCurrentHost=hostid;
-          System.out.println("Test CUrrent Host:" + hostid);
-					//System.out.println("Test Max VM HOST:" + VMCurrentHost);
+                                        VMCurrentHost=hostid;
+                                        System.out.println("Test CUrrent Host:" + hostid);
+					                            //System.out.println("Test Max VM HOST:" + VMCurrentHost);
                                       }
 
                                   }
@@ -464,6 +359,8 @@ System.out.println("HOST ID~~~~ :" +hostid);
             VMResource.retrieveInformation( oneClient);
             /////Host id Returned by our algorithm, where the VM will be migrated
             besthost=VMResource.getHost();
+
+            // This will initiate the migration process
             MigrateVM();
 
         }
@@ -479,7 +376,7 @@ System.out.println("HOST ID~~~~ :" +hostid);
 
 
 
-
+/// This function will list down the details of VM hosted on the host that is violating the lower bound.
     public static void GetMinHostDetails(  )
 
     {
@@ -500,14 +397,13 @@ System.out.println("HOST ID~~~~ :" +hostid);
       for( Host host: pool)
       {
         rc = host.info();
-          //System.out.println(rc.getMessage() + "\n");
+          // System.out.println(rc.getMessage() + "\n");
           hostid=Integer.parseInt(host.xpath("/HOST/ID"));
-      //    System.out.println("HOST ID~~~ :" + hostid);
+          // System.out.println("HOST ID~~~ :" + hostid);
            if (hostid == MinCPUHost )
            {
-
-                // System.out.println("sadsadasdasd" + Integer.parseInt(host.xpath("/HOST/VMS/ID")));
-               ///////////////////
+              //Checking the list of VMs placed on the Current Host
+              //List down the VM Ids on this spesfic hostid
                    String xml = rc.getMessage();
                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                    DocumentBuilder builder = factory.newDocumentBuilder();
@@ -516,14 +412,12 @@ System.out.println("HOST ID~~~~ :" +hostid);
                    XPath xpath = xPathfactory.newXPath();
                    NodeList list = (NodeList) xpath.evaluate("/HOST/VMS/ID", doc, XPathConstants.NODESET);
 
+              //Get the VM Id of each VM on that host
                    for (int i = 0; i < list.getLength(); ++i) {
                        Node node = list.item(i);
-                       //Node node = list3.item(i);
-                                //   System.out.println(node.getFirstChild().getNodeValue());
+
                                    vmid=Integer.parseInt(node.getFirstChild().getNodeValue());
-
                                    System.out.println("My VM ID .........." + vmid);
-
                                      VirtualMachinePool vmPool = new VirtualMachinePool(oneClient);
                                       rc = vmPool.info();
                                       //System.out.println(rc.getMessage() + "\n");
@@ -533,22 +427,16 @@ System.out.println("HOST ID~~~~ :" +hostid);
                                    {
                                        // System.out.println("~~~~~~~~~~" + vm.getId()  + "~~~~" + vmid);
                                         vmCPU = (Double.parseDouble(vm.xpath("/VM_POOL/VM/TEMPLATE/CPU")));
-                                     // VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
-
-                                    //  vmCPUusage = (Double.parseDouble(vm.xpath("/VM/TEMPLATE/CPU") ));
-                                    //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM/HISTORY_RECORDS/HISTORY/HID") ));
-                                    //System.out.println("~~~~~vmCPU~~~~~" + vmCPU + "~~~~VMCurrentHost~~~~" + VMCurrentHost );
-
                                         estCPU= vmCPU;
-                                        ///////VM id Returned having maximum CPU utilization, This VM will be moigrated to new host
+
+                                      //VM id Returned having maximum CPU utilization, This VM will be migrated to new host
                                       if (estCPU >= minCPU)
                                       {
                                         minCPU = estCPU;
                                         SelectedVMForMigration=Integer.parseInt(vm.getId());
-					//VMCurrentHost=(Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
-          VMCurrentHost=hostid;
-           System.out.println("Test CUrrent Host:" + hostid);
-				//	System.out.println("Test CUrrent Host:" + VMCurrentHost);
+                                        VMCurrentHost=hostid;
+                                         System.out.println("Test CUrrent Host:" + hostid);
+                              				//	System.out.println("Test CUrrent Host:" + VMCurrentHost);
                                       }
 
                                   }
@@ -562,6 +450,7 @@ System.out.println("HOST ID~~~~ :" +hostid);
           VMResource.retrieveInformation( oneClient);
           /////Host id Returned by our algorithm, where the VM will be migrated
           besthost=VMResource.getHost2();
+          //This will initiate the migration process
           MigrateVM();
 
       }
@@ -575,6 +464,7 @@ System.out.println("HOST ID~~~~ :" +hostid);
       }
     }
 
+
     //////////////////////CHECK CPU THRESHOLD FOR MIGRATION/////////////////////////
 
     public static void CheckCPUThreshold(  )
@@ -583,43 +473,37 @@ System.out.println("HOST ID~~~~ :" +hostid);
 
 
     try{
-                      /////Host id Returned by our algorithm, where the VM will be migrated
                                 VMResource= new ResourceUsage();
                                 VMResource.retrieveInformation( oneClient);
 
-                                MinCPUHost=VMResource.getMinCPUHost();
-                                MaxCPUHost=VMResource.getMaxCPUHost();
-                                System.out.println( "The HOST ID WITH CPU Utilization < 10 % : " + MinCPUHost);
-                                System.out.println( "The HOST ID WITH CPU Utilization > 50 % : " + MaxCPUHost);
+                                ///// MinCPUHost and MaxCPUHost will have the CPU lower bound and upper bound details i.e the host with max and min CPU utilization
+                                MinCPUHost=VMResource.getMinCPUHost(); // will return the hostid with min CPU utilization
+                                MaxCPUHost=VMResource.getMaxCPUHost(); // will return the hostid with max CPU utilization
+                                System.out.println( "The Host ID with CPU Utilization < 10 % : " + MinCPUHost);
+                                System.out.println( "The Host ID with CPU Utilization > 70 % : " + MaxCPUHost);
 
                                 if (MinCPUHost != 0)
                                 {
-                                  //  flag=true;
-                                    //MigrateVM();
+
                                     System.out.println( "Checking VM List for Min Migration.........." );
                                   //    ManageJob();
-                                    GetMinHostDetails();
+                                    GetMinHostDetails();  // This will return the list of VMs along with details , placed on the host with minimum CPU utilization.
                                 }
                                 else {
-                                  ///////////set the flag to flase to stop MigrateVM
-                                  //flag=false;
+                                  // set the flag to flase to stop MigrateVM
+                                  // flag=false;
                                 }
 
 
                                 if (MaxCPUHost != 0)
                                 {
                                   System.out.println( "Checking VM List for MAX Migration.........." );
-                                  //  flag=true;
-                                  //flag=false;
-                                    //  MigrateVM();
-                                    GetMaxHostDetails();
+                                    GetMaxHostDetails(); // This will return the list of VMs along with details , placed on the host with minimum CPU utilization.
                                 }
                                 else {
-                                  ///////////set the flag to flase to stop MigrateVM
-                            //    flag=false;
+                                  // set the flag to flase to stop MigrateVM
+                                  // flag=false;
                               }
-
-
 
                                  // This is all the information you can get from the OneResponse:
                                System.out.println("\tOpenNebula response");
@@ -638,13 +522,15 @@ System.out.println("HOST ID~~~~ :" +hostid);
     //////////////////////////END CHECK CPU THRESHOLD FOR MIGRATION//////////////////
 
 
+
+
+
     /////////////////////////////NEW VM MIGRATION POLICY///////////////////////////
 
-
+    // This function will perform the migration of the VMS
           public static void MigrateVM(  )
 
           {
-
 
         try{
 
@@ -658,52 +544,41 @@ System.out.println("HOST ID~~~~ :" +hostid);
            String enab = vm.xpath("enabled");
            System.out.println("ID : NAME : " + id+"\t\t"+name+"\t\t"+enab);
 
-//VMResource.retrieveInformation( oneClient);
-                                  /////Host id Returned by our algorithm, where the VM will be migrated
-  //                         ////19072018      // besthost=VMResource.getHost();
-                                //  VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID") ));
-                                  //VMCurrentHost = (Integer.parseInt(vm.xpath("/VM_POOL/VM/HISTORY_RECORDS/HISTORY/HID")));
-                                 // System.out.println ("Current VM HOST " + VMCurrentHost );
                                   System.out.println ("Best Host > 10% " + VMResource.getHost2() );
 
-                                    //   // GLOBAL TIME for the VM
-                                  //  System.out.println (" VM start Time was : " + vm.xpath("/VM_POOL/VM/STIME" ));
+                                  //  ManageJob() will check the status of the job . if the job has sufficient time left to recover the the migration cost . then migration will be done
+                                    ManageJob();
+                                    if (GoodMigrate== true){
 
-                                  // check the existing host of the VM . if it is same as the suggested for migrattion then migration will not be done
-ManageJob();
-if (GoodMigrate== true){
+                                      // check if the existing host of the VM is same as target host . if both are same than migration will not be done
 
+                                                  if (VMCurrentHost != besthost)
+                                                  {
+                                                      System.out.println("The VM ID : " + SelectedVMForMigration + " , Deployed on Host ID : " + VMCurrentHost + " Will be Migrated to Host ID : " + besthost );
 
+                                                      //This command will perform the livemigration of the VM to target host i.e besthost
+                                                      rc = vm.liveMigrate(besthost);
+                                                      rc=vm.info();
+                                                      //Checking the status of the VM untill its running
+                                                        while (vm.status() != "runn")
+                                                        {
+                                                          rc=vm.info();
+                                                        }
+                                                        System.out.println("Migration Completed..... " + vm.status());
 
-                                if (VMCurrentHost != besthost)
-                                {
-                                System.out.println("The VM ID : " + SelectedVMForMigration + " , Deployed on Host ID : " + VMCurrentHost + " Will be Migrated to Host ID : " + besthost );
-                                //  System.out.println(" The VM ID : " + SelectedVMForMigration + " , will be migrated to Host : " + besthost );
-					                             rc = vm.liveMigrate(besthost);
-
-                                     rc=vm.info();
-                                     ///Checking the status of the VM untill it running
-                                     while (vm.status() != "runn")
-                                     {
-                                     rc=vm.info();
-                                     }
-                                       System.out.println("Migration Completed..... " + vm.status());
-
-                                    // This is all the information you can get from the OneResponse:
-                                     System.out.println("\tOpenNebula response");
-                                     System.out.println("\t Error: " + rc.isError());
-                                     //System.out.println("\t Msg: " + rc.getMessage());
-                                     System.out.println("\t ErrMsg: " + rc.getErrorMessage());
-                                  }
-                                  else
-                                  {
-                              //No need to migrate to same host
-                                  }
-GoodMigrate=false;
-}
- //System.out.println(rc.getMessage() + "\n");
-
-      }
+                                                      // This is all the information you can get from the OneResponse:
+                                                       System.out.println("\tOpenNebula response");
+                                                       System.out.println("\t Error: " + rc.isError());
+                                                       //System.out.println("\t Msg: " + rc.getMessage());
+                                                       System.out.println("\t ErrMsg: " + rc.getErrorMessage());
+                                                    }
+                                                    else
+                                                    {
+                                                //No need to migrate to same host
+                                                    }
+                                        GoodMigrate=false;
+                                      }
+       }
 
 
       catch (Exception e) {
@@ -718,20 +593,22 @@ GoodMigrate=false;
 
 /////////////////////////////Manage JOBs///////////////////////////
 
-
+////The funtion getPsourceA returns the VM Source host ID
 public static double getPsourceA() {
-//	System.out.println("svmid:." + svmid );
-  //Psourceid=svmid;
-    PsourceId=VMCurrentHost;
+  PsourceId=VMCurrentHost;
   return PsourceId;
 }
 
+
+////The funtion getPsourceA returns the VM Target host ID
 public static double getPtargetA() {
-  //System.out.println("svmid:." + tvmid );
-  //Ptargetid=tvmid;
-    PtargetId=besthost;
+  PtargetId=besthost;
   return PtargetId;
 }
+
+
+
+/////////////////////The ManageJob() will do the migration cost estimation and evaluate if the migration is going to be cost effective or not
 
     public static void ManageJob(  )
 
@@ -745,35 +622,34 @@ public static double getPtargetA() {
        rc = vmPool.info();
        VirtualMachine vm = vmPool.getById(SelectedVMForMigration);
        rc = vmPool.info();
-       String id = vm.getId();
-       String name = vm.getName();
-
        String enab = vm.xpath("enabled");
-      // System.out.println("ID : NAME : " + id+"\t\t"+name+"\t\t"+enab);
-
-
       //long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
       //long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
 
                           PsourceId=VMCurrentHost;
                           PtargetId=besthost;
 
-
+                            /// get the VM source Host ID
                           double Psource  =VMResource.getPsource();
-                              System.out.println(" Psource ..... " + PsourceId + "...."+ Psource);
+                          System.out.println(" Psource ..... " + PsourceId + "...."+ Psource);
 
-                        double Ptarget=VMResource.getPtarget();
-                              System.out.println(" Ptarget ..... " + PtargetId  +"...."+ Ptarget);
-
+                          /// get the VM Target Host ID
+                          double Ptarget=VMResource.getPtarget();
+                          System.out.println(" Ptarget ..... " + PtargetId  +"...."+ Ptarget);
 
                             long Rtotal=20 * 60000;  //total running time of 20 mins in milisecs
+
                             long Start= (Long.parseLong(vm.xpath("/VM_POOL/VM/USER_TEMPLATE/START")));
                             System.out.println(" CURRENT  VM TIME ..... " + vm.xpath("/VM_POOL/VM/USER_TEMPLATE/START"));
                             long currenttime = System.currentTimeMillis();
+                            /// The time VM spent of the SOurce Machine before successful migration to Target
                             long Rpast= currenttime - Start;
 
+                            // The Power of the Source Host (Psource ) and Target Host (Ptarget)
                             double Dx=Psource - Ptarget;
+                            // The total cost of migration
                             double Costmig= 6 * Psource; // Migtime * Psource
+                            // Time at which the VM has recvoered its migration cost and after that it will be saving power
                             double Toff= Costmig/Dx;
 
                             //Roffset=Rpast+tmig+toff
@@ -781,7 +657,7 @@ public static double getPtargetA() {
                             System.out.println ("Rpast time ........." + Rpast);
                               System.out.println ("Roffset time ........." + Roffset);
                                 System.out.println ("Toff time ........." + Toff);
-
+/// if Roffset > Toff then it means our migration will be cost effective
 if (Roffset >= Toff)
 {
   //good to migrate
@@ -793,12 +669,8 @@ else
   //Not good to migrate
     GoodMigrate=false;
 }
-                            // System.out.println ("VM INFO........." + rc.getMessage());
-                            //  System.out.println ("Best Host > 10% " + VMResource.getHost2() );
 
       }
-
-
 
         catch (Exception e) {
 
@@ -809,14 +681,10 @@ else
 
 
 
-
-
-
-  /////////////////////////////cancel & finalize///////////////////////////
+  ///////////////////////////// Function that will perform the cancel & finalize opertaion on the VM ///////////////////////////
       public static void cancelandfinalize(  )
 
       {
-
 
     try{
 
@@ -832,15 +700,8 @@ else
                         String name = vm.getName();
                         String enab = vm.xpath("enabled");
                         System.out.println(id+"\t\t"+name+"\t\t"+enab);
-                          ////////Not deleting my 2 virtual machines kept then for future tasks
-                        if ( id.equals("11409")  || id.equals("11400") )
 
-                       {
-                          System.out.println("i am in");
 
-                        }
-                        else
-                        {
                       ///give the delay of 30Secs between each delete
                       SECONDS.sleep(30);
                       long startTimeDel = System.currentTimeMillis();
@@ -848,8 +709,10 @@ else
 
                               //  rc = vm.cancel();
                                 System.out.println("\nTrying to cancel the VM " + vm.getId());
+
                               //Command to Delete the VM
                                rc = vm.finalizeVM();
+
                               ///Checking the status of the VM untill we recieve done
                                while (vm.status() != "done")
                                {
@@ -864,7 +727,7 @@ else
                              System.out.println("\t Error: " + rc.isError());
                              System.out.println("\t Msg: " + rc.getMessage());
                              System.out.println("\t ErrMsg: " + rc.getErrorMessage());
-                        }
+
                     }
 
 }
@@ -898,14 +761,6 @@ else
                         String name = vm.getName();
                         String enab = vm.xpath("enabled");
                         System.out.println(id+"\t\t"+name+"\t\t"+enab);
-                        ////////Not deleting my 2 virtual machines kept then for future tasks
-                        if ( id.equals("11409")  || id.equals("11400") )
-                       {
-                          System.out.println("i am in");
-
-                        }
-                        else
-                        {
 
             //////////////////give the delay of 30Secs between each shutdown
                       SECONDS.sleep(30);
@@ -933,7 +788,7 @@ else
                              System.out.println("\t Error: " + rc.isError());
                              System.out.println("\t Msg: " + rc.getMessage());
                              System.out.println("\t ErrMsg: " + rc.getErrorMessage());
-                        }
+
                     }
 
     }

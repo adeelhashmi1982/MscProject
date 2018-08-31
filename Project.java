@@ -1,4 +1,10 @@
- import java.io.*;
+/**
+	 * Final Code for Project Resource Manager
+	 * Adeel Ahmed Hashmi
+	 * University of Leeds
+	 */
+
+import java.io.*;
 
  import javax.xml.parsers.DocumentBuilder;
  import javax.xml.parsers.DocumentBuilderFactory;
